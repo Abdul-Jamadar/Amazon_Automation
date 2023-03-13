@@ -80,5 +80,6 @@ public class ExchangeOfferValidation extends Utility {
 		waitForElement(By.id("priceAfterBuyBackDiscount"));
 		String final_price = driver.findElement(By.id("priceAfterBuyBackDiscount")).getText();
 		setData(productName, price, exchange_value, final_price);
+		MySQL(productName, price, exchange_value, final_price);
 	}
 }

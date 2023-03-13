@@ -16,10 +16,6 @@ Examples:
 |			  smartphone					|
 |Redmi Note 11T 5G					|
 |Oppo F21s Pro 5G						|
-|Samsung Galaxy S22 Ultra   |
-|OnePlus 11R 5G							|
-|iQOO 11 5G									|
-|OnePlus Nord 2T 5G					|
-|realme Narzo 50 Pro 5G			|
+
 
 

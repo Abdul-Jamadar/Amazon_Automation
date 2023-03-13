@@ -1,9 +1,16 @@
 package Utilities;
 
+import static org.testng.Assert.expectThrows;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.Properties;
@@ -92,7 +99,8 @@ public class Utility {
 		exchange = new ExchangeOfferValidation(driver);
 	}
 
-	public void setData(String productName, String orinalPrice, String exchange_value, String finalValue) throws Exception {
+	public void setData(String productName, String orinalPrice, String exchange_value, String finalValue)
+			throws Exception {
 
 		FileInputStream fis = new FileInputStream("./src/main/resources/Product Sheet.xlsx");
 		XSSFWorkbook book = new XSSFWorkbook(fis);
@@ -101,16 +109,17 @@ public class Utility {
 
 		if (!itrRow.hasNext()) {
 			System.out.println(productName + " entered if loop");
-			CellIterator(0, productName, orinalPrice, exchange_value, finalValue,sheet);
+			CellIterator(0, productName, orinalPrice, exchange_value, finalValue, sheet);
 		} else if (itrRow.hasNext()) {
-			CellIterator(sheet.getLastRowNum() + 1, productName,orinalPrice, exchange_value,finalValue, sheet);
+			CellIterator(sheet.getLastRowNum() + 1, productName, orinalPrice, exchange_value, finalValue, sheet);
 		}
 		FileOutputStream fos = new FileOutputStream("./src/main/resources/Product Sheet.xlsx");
 		book.write(fos);
 
 	}
 
-	public void CellIterator(int rowNumber, String productName, String orinalPrice, String exchange_value, String finalValue, XSSFSheet sheet) {
+	public void CellIterator(int rowNumber, String productName, String orinalPrice, String exchange_value,
+			String finalValue, XSSFSheet sheet) {
 		Row row1 = sheet.createRow(rowNumber);
 		Cell cell1 = row1.createCell(0);
 		cell1.setCellValue(productName);
@@ -120,5 +129,36 @@ public class Utility {
 		cell3.setCellValue(exchange_value);
 		Cell cell4 = row1.createCell(3);
 		cell4.setCellValue(finalValue);
+	}
+
+	public void MySQL(String productName, String orinalPrice, String exchange_value, String finalValue)
+			throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/demo", "student", "Abdul@1501");
+		ResultSet rs = conn.createStatement().executeQuery("show tables");
+		short x = 0;
+		if (!rs.next()) {
+			conn.createStatement().executeUpdate(
+					"create table productdetails (Product_Name varchar (50), Original_value_Rs varchar(30), Old_Phone_value_Rs\r\n"
+							+ "varchar(30), Final_value_after_exchange_Rs varchar(30))");
+		} else if (rs.next()) {
+			while (rs.next()) {
+				if (rs.getString("Tables_in_demo").equalsIgnoreCase("productdetails")) {
+					x = 1;
+					break;
+				}
+			}
+
+			if (x == 0) {
+				conn.createStatement().executeUpdate(
+						"create table productdetails (Product_Name varchar (50), Original_value_Rs varchar(30), Old_Phone_value_Rs\r\n"
+								+ "varchar(30), Final_value_after_exchange_Rs varchar(30))");
+			}
+		}
+		conn.createStatement().executeUpdate("insert into productdetails values ('" + productName + "','" + orinalPrice
+				+ "','" + exchange_value + "','" + finalValue + "')");
+	}
+
+	public void tearDown() {
+		driver.quit();
 	}
 }
