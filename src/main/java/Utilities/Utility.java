@@ -1,7 +1,5 @@
 package Utilities;
 
-import static org.testng.Assert.expectThrows;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -10,10 +8,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -24,6 +22,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -52,6 +51,7 @@ public class Utility {
 	public String browserName;
 	public String iMEI;
 	public String model;
+	Connection conn;
 
 	public WebDriver driverSetup() throws Exception {
 		FileInputStream fis = new FileInputStream(System.getProperty("user.dir") + "//Property.properties");
@@ -63,10 +63,12 @@ public class Utility {
 		urPassword = prop.getProperty("password");
 		iMEI = prop.getProperty("IMEI");
 		model = prop.getProperty("model");
+		ChromeOptions chromeOptions = new ChromeOptions();
+		chromeOptions.addArguments("--remote-allow-origins=*");
 
 		if (browserName.equals("chrome")) {
 			WebDriverManager.chromedriver().setup();
-			driver = new ChromeDriver();
+			driver = new ChromeDriver(chromeOptions);
 		} else if (browserName.equals("edge")) {
 			WebDriverManager.edgedriver().setup();
 			driver = new EdgeDriver();
@@ -131,15 +133,15 @@ public class Utility {
 		cell4.setCellValue(finalValue);
 	}
 
-	public void MySQL(String productName, String orinalPrice, String exchange_value, String finalValue)
+	public void Add_Data_to_Database(String productName, int orinalPrice, int exchange_value, int finalValue)
 			throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/demo", "student", "Abdul@1501");
+		conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/demo", "student", "Abdul@1501");
 		ResultSet rs = conn.createStatement().executeQuery("show tables");
 		short x = 0;
 		if (!rs.next()) {
 			conn.createStatement().executeUpdate(
-					"create table productdetails (Product_Name varchar (50), Original_value_Rs varchar(30), Old_Phone_value_Rs\r\n"
-							+ "varchar(30), Final_value_after_exchange_Rs varchar(30))");
+					"create table productdetails (Product_Name varchar (50), Original_value_Rs int, Old_Phone_value_Rs\r\n"
+							+ "int, Final_value_after_exchange_Rs int)");
 		} else if (rs.next()) {
 			while (rs.next()) {
 				if (rs.getString("Tables_in_demo").equalsIgnoreCase("productdetails")) {
@@ -150,15 +152,39 @@ public class Utility {
 
 			if (x == 0) {
 				conn.createStatement().executeUpdate(
-						"create table productdetails (Product_Name varchar (50), Original_value_Rs varchar(30), Old_Phone_value_Rs\r\n"
-								+ "varchar(30), Final_value_after_exchange_Rs varchar(30))");
+						"create table productdetails (Product_Name varchar (50), Original_value_Rs int, Old_Phone_value_Rs\r\n"
+								+ "int, Final_value_after_exchange_Rs int)");
 			}
 		}
 		conn.createStatement().executeUpdate("insert into productdetails values ('" + productName + "','" + orinalPrice
 				+ "','" + exchange_value + "','" + finalValue + "')");
 	}
 
+	public void Run_Query() throws SQLException {
+//		PreparedStatement ps=conn.prepareStatement("select ?,? from productdetails order by Old_phone_value_rs desc limit 1");
+//		ps.setString(1, "Product_Name");
+//		ps.setString(2,"Final_value_after_exchange_Rs");
+		ResultSet rs = conn.createStatement()
+				.executeQuery("select * from productdetails order by Old_phone_value_rs desc limit 1");
+		while (rs.next()) {
+			System.out.println("Most Affordable Purchase with highest exchange price is " + rs.getString("Product_Name")
+					+ " smartphone with final price after exchange offer " + rs.getString("Final_value_after_exchange_Rs")+"/- rs");
+		}
+	}
+
 	public void tearDown() {
 		driver.quit();
+	}
+
+	public int String_to_Int(String string_number) {
+		String str="";
+		for (int i = 0; i < string_number.length(); i++) {
+			String s = "" + string_number.charAt(i);
+			if (Pattern.matches("[0-9]", s)||(s.equals("."))) {
+				str = str.concat(s);
+			}
+		}
+		double number = Double.parseDouble(str);
+		return (int)number;
 	}
 }

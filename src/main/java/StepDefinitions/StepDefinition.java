@@ -46,10 +46,6 @@ public class StepDefinition extends Utility {
 
 	@Then("I should be able to see the final price.")
 	public void i_should_be_able_to_see_the_final_price() {
-		waitForElement(By.id("priceAfterBuyBackDiscount"));
-		System.out.println(
-				"Final Price with exchange is " + driver.findElement(By.id("priceAfterBuyBackDiscount")).getText());
-		
 	}
 	
 	@Then("I should be able get the most profitable purchase with highest exchange price")

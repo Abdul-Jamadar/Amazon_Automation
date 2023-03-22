@@ -57,7 +57,7 @@ public class ExchangeOfferValidation extends Utility {
 			driver.switchTo().window(itr.next());
 		}
 		String price = initialPrice.getText();
-		System.out.println("Initail price is " + price);
+		int price0=String_to_Int(price);
 		getScreenShot(productName);
 		waitForElement(element1);
 		exchangeRow.findElement(element2).click();
@@ -73,13 +73,16 @@ public class ExchangeOfferValidation extends Utility {
 		content.click();
 		noDamage.click();
 		String exchange_value = exchangePrice.getText();
+		int exchange0=String_to_Int(exchange_value);
 		iMEITextBox.sendKeys(IMEI);
 		verifyIMEI.click();
 		waitForElement(By.cssSelector("input[aria-labelledby*=applyBuyBack]"));
 		applyButton.click();
 		waitForElement(By.id("priceAfterBuyBackDiscount"));
 		String final_price = driver.findElement(By.id("priceAfterBuyBackDiscount")).getText();
+		int final0=String_to_Int(final_price);
 		setData(productName, price, exchange_value, final_price);
-		MySQL(productName, price, exchange_value, final_price);
+		Add_Data_to_Database(productName, price0, exchange0, final0);
+		Run_Query();
 	}
 }
