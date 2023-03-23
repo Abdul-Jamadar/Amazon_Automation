@@ -14,3 +14,4 @@ Technologies used:
 3. Apache POI
 4. Cucumber 
 5. TESTNG
+6. JDBC with MySQL
